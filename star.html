@@ -825,13 +825,13 @@ footer{
         <div class="work">
           <p class="wt">Jenkins 빌드 환경 구성</p>
           <dl class="star">
-            <div class="star-row"><dt><span class="sl">S</span>상황</dt><dd>지원 플랫폼이 많아 빌드를 순차로 처리하면 대기 시간이 길어졌습니다.</dd></div>
+            <div class="star-row"><dt><span class="sl">S</span>상황</dt><dd>윈도우·안드로이드·iOS 빌드를 한 머신에서 순차로 처리하고 있어, 플랫폼 수만큼 대기 시간이 쌓였습니다.</dd></div>
             <div class="star-row"><dt><span class="sl">T</span>과제</dt><dd>다양한 플랫폼 빌드를 더 빠르게 처리하고, 결과 공유까지 자동화해야 했습니다.</dd></div>
             <div class="star-row"><dt><span class="sl">A</span>실행</dt><dd><ul>
               <li>사용 가능한 빌드 머신을 각각 agent로 등록하고, 빌드 과정을 Task로 나눈 뒤 Pipeline으로 조합</li>
               <li>빌드 완료 시 Webhook으로 MS Teams 채널에 알림</li>
             </ul></dd></div>
-            <div class="star-row r"><dt><span class="sl">R</span>결과</dt><dd>플랫폼별 빌드를 여러 머신에 분산해 병렬로 처리하고, 완료 결과를 팀 채널에서 바로 확인할 수 있게 되었습니다.<span class="need">보강 제안 — 개선 전후 빌드 시간(예: 3시간 → 1시간)이 기억나면 넣어주세요. 가장 설득력 있는 수치입니다.</span></dd></div>
+            <div class="star-row r"><dt><span class="sl">R</span>결과</dt><dd>세 플랫폼 빌드를 각 머신에서 동시에 처리하게 되면서, 전체 빌드 시간이 세 플랫폼을 더한 시간에서 한 번의 빌드 시간 수준으로 줄었습니다. 빌드당 20분 기준으로 약 1시간에서 약 20분입니다. 완료 결과는 팀 채널에서 바로 확인할 수 있게 했습니다.</dd></div>
           </dl>
         </div>
       </div>
