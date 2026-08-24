@@ -395,14 +395,29 @@ footer{
     --accent:#A72B1E;--accent-soft:rgba(167,43,30,.08);
     --portrait-filter:none;
   }
-  body{background:#fff;font-size:10.5pt;}
+  body{background:#fff;font-size:9.8pt;}
   .sheet{box-shadow:none;margin:0;padding:0;max-width:none;}
   .toolbar,.toc,footer{display:none!important;}
   .reveal{opacity:1!important;transform:none!important;animation:none!important;}
-  .sec{margin-top:28px;padding-top:20px;}
+  .sec{margin-top:22px;padding-top:16px;}
   h2,.item,.list li,.press,.proj-grid,.work,.shot,.cap{break-inside:avoid;}
   .shot img{transform:none!important;}
   .stack .chip{background:#fff;}
+
+  /* 지면 밀도 조정 — 첫 장에 핵심 역량 6개가 모두 들어가도록 */
+  h2{margin-bottom:16px;}
+  .lead{margin-bottom:20px;line-height:1.6;}
+  .masthead{margin-bottom:4px;}
+  .portrait{width:118px;}
+  .cap{padding:10px 13px 11px;}
+  .cap-d{line-height:1.62;margin-top:5px;}
+
+  /* 카드 배경을 깔아 선을 만드는 방식은 페이지가 나뉠 때
+     남는 영역이 회색 덩어리로 찍히므로, 인쇄에서는 실제 테두리로 그림 */
+  .caps{background:none;gap:0;border:1px solid var(--rule);}
+  .cap{border-top:1px solid var(--rule);border-left:1px solid var(--rule);}
+  .cap:nth-child(-n+2){border-top:none;}
+  .cap:nth-child(odd){border-left:none;}
 }
 </style>
 </head>
