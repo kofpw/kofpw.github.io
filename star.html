@@ -401,6 +401,11 @@ footer{
   .reveal{opacity:1!important;transform:none!important;animation:none!important;}
   .sec{margin-top:22px;padding-top:16px;}
   h2,.item,.list li,.press,.proj-grid,.work,.shot,.cap{break-inside:avoid;}
+  /* 제목만 페이지 끝에 남지 않도록 다음 내용과 붙임 */
+  h2{break-after:avoid;page-break-after:avoid;}
+  .hrow{break-after:avoid;page-break-after:avoid;}
+  /* 짧은 후반부 섹션은 통째로 유지 */
+  #edu,#award,#cert,#etc,#interview{break-inside:avoid;}
   .shot img{transform:none!important;}
   .stack .chip{background:#fff;}
 
