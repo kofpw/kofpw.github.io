@@ -652,6 +652,18 @@ footer{
           </dl>
         </div>
         <div class="work">
+          <p class="wt">캐릭터 FSM 개선</p>
+          <dl class="star">
+            <div class="star-row"><dt><span class="sl">S</span>상황</dt><dd>상태이상의 종류가 늘어나면서, 하나의 State로 묶어 처리하던 방식으로는 각기 다른 동작을 표현하기 어려워졌습니다.</dd></div>
+            <div class="star-row"><dt><span class="sl">T</span>과제</dt><dd>상태이상별 동작 차이를 코드 분기 대신 데이터로 제어할 수 있어야 했습니다.</dd></div>
+            <div class="star-row"><dt><span class="sl">A</span>실행</dt><dd><ul>
+              <li>상태이상 State를 특성에 따라 세분화해 관리</li>
+              <li>루트모션 기반 상태이상은 데이터 입력값에 따라 루트모션 길이를 제어하는 기능 추가</li>
+            </ul></dd></div>
+            <div class="star-row r"><dt><span class="sl">R</span>결과</dt><dd>밀려남·띄우기처럼 루트모션을 쓰는 상태이상의 이동 거리를 기획 데이터로 조절할 수 있게 되었습니다.</dd></div>
+          </dl>
+        </div>
+        <div class="work">
           <p class="wt">UI 흐름 정리 및 일원화</p>
           <dl class="star">
             <div class="star-row"><dt><span class="sl">S</span>상황</dt><dd>컨텐츠가 UI만으로 이루어지는 경우가 많은데, 현재 어떤 컨텐츠가 동작 중인지 알 수 있는 수단이 없어 컨텐츠 개발에 제약이 있음을 확인했습니다.</dd></div>
@@ -673,18 +685,6 @@ footer{
               <li>노드를 자연어로 익스포트한 뒤, 그 파일을 C++ 코드로 변환하는 방식으로 정리</li>
             </ul></dd></div>
             <div class="star-row r"><dt><span class="sl">R</span>결과</dt><dd>BP 그래프 노드가 방치돼 있던 애셋 약 200개를 C++ 코드로 옮겼습니다. 손이 많이 가지만 판단이 단순한 정리 작업을 AI에 넘긴 덕에, 흩어져 있던 로직이 C++로 모이면서 디버깅과 코드 추적이 가능한 상태가 되었습니다.</dd></div>
-          </dl>
-        </div>
-        <div class="work">
-          <p class="wt">캐릭터 FSM 개선</p>
-          <dl class="star">
-            <div class="star-row"><dt><span class="sl">S</span>상황</dt><dd>상태이상의 종류가 늘어나면서, 하나의 State로 묶어 처리하던 방식으로는 각기 다른 동작을 표현하기 어려워졌습니다.</dd></div>
-            <div class="star-row"><dt><span class="sl">T</span>과제</dt><dd>상태이상별 동작 차이를 코드 분기 대신 데이터로 제어할 수 있어야 했습니다.</dd></div>
-            <div class="star-row"><dt><span class="sl">A</span>실행</dt><dd><ul>
-              <li>상태이상 State를 특성에 따라 세분화해 관리</li>
-              <li>루트모션 기반 상태이상은 데이터 입력값에 따라 루트모션 길이를 제어하는 기능 추가</li>
-            </ul></dd></div>
-            <div class="star-row r"><dt><span class="sl">R</span>결과</dt><dd>밀려남·띄우기처럼 루트모션을 쓰는 상태이상의 이동 거리를 기획 데이터로 조절할 수 있게 되었습니다.</dd></div>
           </dl>
         </div>
         <div class="work">
