@@ -327,7 +327,7 @@ footer a{color:inherit;}
       <ol>
         <li><a id="gc-signup" href="https://www.goatcounter.com/signup" target="_blank" rel="noopener">goatcounter.com</a>에서 무료 계정을 만들고 사이트 코드를 정합니다.</li>
         <li>이 파일 맨 아래 <code>CODE</code> 값을 그 사이트 코드로 바꿉니다. <code>index.html</code>의 <code>CODE</code>도 같은 값이어야 합니다.</li>
-        <li>대시보드의 <code>Settings → API tokens</code>에서 토큰을 만듭니다. 권한은 <code>Read statistics</code>만 있으면 됩니다.</li>
+        <li>대시보드 우측 상단의 사용자 메뉴 → <code>API</code>(주소는 <code>/user/api</code>)에서 토큰을 만듭니다. 사이트 설정이 아니라 사용자 메뉴에 있습니다.</li>
         <li>토큰을 아래에 붙여넣습니다.</li>
       </ol>
       <div class="field">
@@ -352,8 +352,8 @@ footer a{color:inherit;}
     <div id="total-body">
       <div class="totals">
         <div class="tot"><p class="k">Pageviews</p><p class="v dim" id="v-views">—</p></div>
-        <div class="tot"><p class="k">Visitors</p><p class="v dim" id="v-visitors">—</p></div>
         <div class="tot"><p class="k">Per day</p><p class="v dim" id="v-perday">—</p></div>
+        <div class="tot"><p class="k">Peak day</p><p class="v dim" id="v-peak">—</p></div>
       </div>
     </div>
   </section>
@@ -554,86 +554,102 @@ footer a{color:inherit;}
   var days = 30;
 
   function period(){
-    // 0 이면 전체 기간 — start 를 붙이지 않는다.
-    if (!days) return '';
-    return '?start=' + ymd(daysAgo(days - 1)) + '&end=' + ymd(new Date());
+    // start 를 생략하면 GoatCounter 는 '일주일 전'을 기본값으로 쓴다.
+    // '전체'를 고른 경우에도 반드시 아주 이른 날짜를 명시해야 한다.
+    var from = days ? ymd(daysAgo(days - 1)) : '2000-01-01';
+    return '?start=' + from + '&end=' + ymd(new Date());
   }
   function joinQ(p, extra){
     return p ? p + '&' + extra : '?' + extra;
   }
 
   /* ================= 패널 ================= */
-  function loadTotal(){
-    var vv = $('v-views'), vs = $('v-visitors'), vp = $('v-perday');
-    [vv, vs, vp].forEach(function(el){ el.textContent = '…'; el.classList.add('dim'); });
+  // /stats/total 한 번으로 합계와 일별 시계열을 모두 받는다.
+  // 응답: { total, total_events, total_utc, stats:[{ day, daily, hourly }] }
+  function loadOverview(){
+    var vv = $('v-views'), vp = $('v-perday'), vk = $('v-peak');
+    [vv, vp, vk].forEach(function(el){ el.textContent = '…'; el.classList.add('dim'); });
+    $('daily-body').innerHTML = '<p class="skel">불러오는 중…</p>';
 
     return api('/stats/total' + period()).then(function(j){
-      var views    = pickNum(j, ['total', 'total_hits', 'count'], 0);
-      var visitors = pickNum(j, ['total_unique', 'unique', 'visitors'], 0);
+      var total = pickNum(j, ['total'], 0);
 
-      vv.textContent = num(views);
-      vv.classList.toggle('dim', views === null);
-      vs.textContent = num(visitors);
-      vs.classList.toggle('dim', visitors === null);
-
-      if (views !== null && days){
-        vp.textContent = (Math.round(views / days * 10) / 10).toLocaleString('en-US');
-        vp.classList.remove('dim');
-      } else {
-        vp.textContent = '—';
-        vp.classList.add('dim');
+      // 일별 시계열
+      var series = [];
+      if (j && Array.isArray(j.stats)){
+        for (var i = 0; i < j.stats.length; i++){
+          var row = j.stats[i];
+          if (!row || !row.day) continue;
+          var c = pickNum(row, ['daily', 'count'], 0);
+          series.push({ day: String(row.day), count: c === null ? 0 : c });
+        }
+        series.sort(function(a, b){ return a.day < b.day ? -1 : 1; });
       }
+
+      var peak = 0;
+      for (var k = 0; k < series.length; k++) peak = Math.max(peak, series[k].count);
+
+      setTile(vv, total);
+      setTile(vk, series.length ? peak : null);
+
+      // 기간이 '전체'면 실제 집계된 일수로 나눈다.
+      var span = days || series.length;
+      setTile(vp, (total !== null && span) ? Math.round(total / span * 10) / 10 : null);
+
+      renderChart(series);
     }).catch(function(e){
       renderError($('total-body'), e);
+      renderError($('daily-body'), e);
       throw e;
     });
   }
 
-  function loadDaily(){
-    var el = $('daily-body');
-    el.innerHTML = '<p class="skel">불러오는 중…</p>';
+  function setTile(el, v){
+    if (v === null || v === undefined){
+      el.textContent = '—';
+      el.classList.add('dim');
+      return;
+    }
+    el.textContent = (typeof v === 'number') ? v.toLocaleString('en-US') : String(v);
+    el.classList.remove('dim');
+  }
 
-    return api('/stats/hits' + joinQ(period(), 'daily=true&limit=100')).then(function(j){
-      // 경로별로 쪼개져 오므로 날짜별로 합산한다.
-      var byDay = {}, order = [];
-      var list = (j && (j.hits || j.stats)) || [];
-      for (var i = 0; i < list.length; i++){
-        var st = list[i] && (list[i].stats || list[i].daily);
-        if (!Array.isArray(st)) continue;
-        for (var k = 0; k < st.length; k++){
-          var d = st[k] && (st[k].day || st[k].date);
-          var c = pickNum(st[k], ['daily', 'count', 'total'], 0);
-          if (!d || c === null) continue;
-          if (!(d in byDay)){ byDay[d] = 0; order.push(d); }
-          byDay[d] += c;
-        }
-      }
-      order.sort();
+  // 막대가 너무 촘촘해지면 주 단위로 묶는다.
+  function bucket(series, maxBars){
+    if (series.length <= maxBars) return { rows: series, unit: '일' };
+    var size = Math.ceil(series.length / maxBars), rows = [];
+    for (var i = 0; i < series.length; i += size){
+      var sum = 0, chunk = series.slice(i, i + size);
+      for (var k = 0; k < chunk.length; k++) sum += chunk[k].count;
+      rows.push({ day: chunk[0].day, count: sum, span: chunk.length });
+    }
+    return { rows: rows, unit: size + '일' };
+  }
 
-      if (!order.length){
-        el.innerHTML = '<p class="skel">이 기간에는 기록이 없습니다.</p>';
-        $('daily-note').textContent = '';
-        return;
-      }
+  function renderChart(series){
+    var el = $('daily-body'), note = $('daily-note');
+    if (!series.length){
+      el.innerHTML = '<p class="skel">이 기간에는 기록이 없습니다.</p>';
+      note.textContent = '';
+      return;
+    }
 
-      var max = 0;
-      for (var m = 0; m < order.length; m++) max = Math.max(max, byDay[order[m]]);
+    var b = bucket(series, 120);
+    var rows = b.rows, max = 0;
+    for (var i = 0; i < rows.length; i++) max = Math.max(max, rows[i].count);
 
-      var bars = '';
-      for (var b = 0; b < order.length; b++){
-        var v = byDay[order[b]];
-        var h = max ? Math.max(2, Math.round(v / max * 100)) : 2;
-        bars += '<div class="bar' + (v ? '' : ' zero') + '" style="height:' + h + '%" ' +
-                'title="' + esc(order[b]) + ' · ' + num(v) + '"></div>';
-      }
-      el.innerHTML =
-        '<div class="chart">' + bars + '</div>' +
-        '<div class="axis"><span>' + esc(order[0]) + '</span><span>' + esc(order[order.length - 1]) + '</span></div>';
-      $('daily-note').textContent = 'Peak ' + num(max);
-    }).catch(function(e){
-      renderError(el, e);
-      throw e;
-    });
+    var bars = '';
+    for (var j = 0; j < rows.length; j++){
+      var v = rows[j].count;
+      var h = max ? Math.max(2, Math.round(v / max * 100)) : 2;
+      bars += '<div class="bar' + (v ? '' : ' zero') + '" style="height:' + h + '%" ' +
+              'title="' + esc(rows[j].day) + ' · ' + num(v) + '"></div>';
+    }
+    el.innerHTML =
+      '<div class="chart">' + bars + '</div>' +
+      '<div class="axis"><span>' + esc(series[0].day) + '</span>' +
+      '<span>' + esc(series[series.length - 1].day) + '</span></div>';
+    note.textContent = rows.length + '개 구간 · ' + b.unit + ' 단위';
   }
 
   function loadRank(path, elId, emptyMsg){
@@ -657,8 +673,7 @@ footer a{color:inherit;}
     if (reloadBtn) reloadBtn.classList.add('busy');
 
     var jobs = [
-      loadTotal(),
-      loadDaily(),
+      loadOverview(),
       loadRank('/stats/toprefs', 'ref-body', '유입 경로 기록이 없습니다.'),
       loadRank('/stats/browsers', 'browser-body', '브라우저 기록이 없습니다.'),
       loadRank('/stats/systems', 'system-body', '운영체제 기록이 없습니다.')
