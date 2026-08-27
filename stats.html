@@ -513,13 +513,20 @@ footer a{color:inherit;}
   function showNotice(err){
     if (noticeShown) return;
     noticeShown = true;
+    var rateLimited = String(err).indexOf('429') !== -1;
+    var advice = rateLimited
+      ? 'GoatCounter API 는 초당 4회로 제한됩니다. 요청을 한 줄로 세워 보내지만, ' +
+        '짧은 시간에 새로고침을 반복하면 한도가 다시 찰 때까지 걸릴 수 있습니다. ' +
+        '1분쯤 뒤에 새로고침해 주세요.'
+      : '토큰이 유효한지, <code>CODE</code>가 <code>' + esc(CODE) + '</code>로 맞는지 확인해 주세요. ' +
+        '브라우저가 교차 출처 요청(CORS)을 막는 경우에도 같은 증상이 나타납니다.';
+
     var el = $('notice');
     el.innerHTML =
       '<div class="state err">' +
         '<p>통계를 불러오지 못했습니다 — ' + esc(err) + '</p>' +
-        '<p>토큰이 유효한지, <code>CODE</code>가 <code>' + esc(CODE) + '</code>로 맞는지 확인해 주세요. ' +
-        '브라우저가 교차 출처 요청(CORS)을 막는 경우에도 같은 증상이 나타납니다. ' +
-        '그때는 <a href="' + esc(BASE) + '" target="_blank" rel="noopener">GoatCounter 대시보드</a>에서 같은 수치를 볼 수 있습니다.</p>' +
+        '<p>' + advice + ' ' +
+        '<a href="' + esc(BASE) + '" target="_blank" rel="noopener">GoatCounter 대시보드</a>에서도 같은 수치를 볼 수 있습니다.</p>' +
       '</div>';
     el.hidden = false;
   }
@@ -539,15 +546,60 @@ footer a{color:inherit;}
     try{ t ? localStorage.setItem(TOKEN_KEY, t) : localStorage.removeItem(TOKEN_KEY); }catch(e){}
   }
 
-  function api(path){
+  /* ================= 요청 큐 =================
+     GoatCounter API 는 초당 4회 토큰 버킷 제한이라 동시에 쏘면 바로 429 가
+     난다. 요청을 한 줄로 세워 최소 간격을 두고 보내고, 그래도 429 가 오면
+     물러섰다가 다시 시도한다. */
+  var MIN_GAP   = 400;   // 요청 시작 사이 최소 간격(ms)
+  var MAX_RETRY = 4;
+  var queue = Promise.resolve();
+  var lastStart = 0;
+
+  function sleep(ms){
+    return new Promise(function(r){ setTimeout(r, ms); });
+  }
+
+  // 429 응답이 알려 주는 대기 시간을 쓰되, 없으면 지수적으로 물러선다.
+  // CORS 로 헤더가 안 보일 수 있으므로 실패해도 그냥 넘어간다.
+  function backoff(r, attempt){
+    var h;
+    try{
+      h = r.headers.get('Retry-After') || r.headers.get('X-Rate-Limit-Reset');
+    }catch(e){}
+    var n = h ? parseInt(h, 10) : NaN;
+    if (!isNaN(n) && n > 0 && n <= 60) return n * 1000 + 200;
+    return Math.min(8000, 800 * Math.pow(2, attempt));   // 0.8 → 1.6 → 3.2 → 6.4s
+  }
+
+  function request(path, attempt){
     return fetch(API + path, {
       headers: { 'Authorization': 'Bearer ' + getToken() },
       cache: 'no-store'
     }).then(function(r){
+      if (r.status === 429){
+        if (attempt >= MAX_RETRY){
+          return Promise.reject('요청 제한에 걸렸습니다 (429). 잠시 후 새로고침해 주세요.');
+        }
+        return sleep(backoff(r, attempt)).then(function(){
+          return request(path, attempt + 1);
+        });
+      }
       if (r.status === 401 || r.status === 403) return Promise.reject('토큰이 거부되었습니다 (' + r.status + ')');
       if (!r.ok) return Promise.reject('HTTP ' + r.status);
       return r.json();
     });
+  }
+
+  function api(path){
+    var run = queue.then(function(){
+      return sleep(Math.max(0, MIN_GAP - (Date.now() - lastStart))).then(function(){
+        lastStart = Date.now();
+        return request(path, 0);
+      });
+    });
+    // 한 요청이 실패해도 뒤의 요청은 계속 흘러야 한다.
+    queue = run.then(function(){}, function(){});
+    return run;
   }
 
   /* ================= 기간 ================= */
