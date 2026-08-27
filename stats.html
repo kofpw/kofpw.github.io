@@ -597,8 +597,11 @@ footer a{color:inherit;}
   function period(){
     // start 를 생략하면 GoatCounter 는 '일주일 전'을 기본값으로 쓴다.
     // '전체'를 고른 경우에도 반드시 아주 이른 날짜를 명시해야 한다.
-    var from = days ? ymd(daysAgo(days - 1)) : '2000-01-01';
-    return '?start=' + from + '&end=' + ymd(new Date());
+    //
+    // end 는 반대로 절대 보내지 않는다. 날짜만 넘기면 그 날 00:00 으로
+    // 해석돼서 오늘 기록이 통째로 빠진다. 생략하면 서버가 오늘 끝까지로
+    // 잡아 주고, 우리가 쓰는 구간은 전부 '오늘까지'라 그게 맞다.
+    return '?start=' + (days ? ymd(daysAgo(days - 1)) : '2000-01-01');
   }
   function joinQ(p, extra){
     return p ? p + '&' + extra : '?' + extra;
