@@ -177,8 +177,7 @@ h2 .note{
   font-size:10.5px;font-weight:500;letter-spacing:.06em;color:var(--faint);
 }
 
-/* ================= 순위 목록 (유입 경로 · 브라우저 · 기기) ================= */
-.cols{display:grid;grid-template-columns:1fr 1fr;gap:34px;}
+/* ================= 순위 목록 (유입 경로) ================= */
 .rank{list-style:none;margin:0;padding:0;}
 .rank li{
   position:relative;
@@ -275,7 +274,6 @@ footer a{color:inherit;}
   .sheet{padding:60px var(--sheet-pad) 48px;}
   .sec{margin-top:44px;padding-top:24px;}
   .totals{grid-template-columns:1fr;}
-  .cols{grid-template-columns:1fr;gap:28px;}
   .chart{height:120px;}
 }
 </style>
@@ -370,15 +368,6 @@ footer a{color:inherit;}
     <div id="ref-body"><p class="skel">불러오는 중…</p></div>
   </section>
 
-  <!-- 브라우저 · 기기 -->
-  <section class="sec" id="env-sec">
-    <h2><span>브라우저 · 운영체제</span><span class="note">Browsers · Systems</span></h2>
-    <div class="cols">
-      <div id="browser-body"><p class="skel">불러오는 중…</p></div>
-      <div id="system-body"><p class="skel">불러오는 중…</p></div>
-    </div>
-  </section>
-
   <footer>
     <span>이윤석 · Yunseok Lee</span>
     <span><a id="gc-dash" href="https://www.goatcounter.com" target="_blank" rel="noopener">GoatCounter 대시보드 ↗</a></span>
@@ -462,7 +451,7 @@ footer a{color:inherit;}
     var arr = null;
     if (Array.isArray(j)) arr = j;
     else if (j && typeof j === 'object'){
-      var cand = ['stats', 'hits', 'refs', 'browsers', 'systems', 'list'];
+      var cand = ['stats', 'refs', 'list'];
       for (var i = 0; i < cand.length; i++){
         if (Array.isArray(j[cand[i]])){ arr = j[cand[i]]; break; }
       }
@@ -726,9 +715,7 @@ footer a{color:inherit;}
 
     var jobs = [
       loadOverview(),
-      loadRank('/stats/toprefs', 'ref-body', '유입 경로 기록이 없습니다.'),
-      loadRank('/stats/browsers', 'browser-body', '브라우저 기록이 없습니다.'),
-      loadRank('/stats/systems', 'system-body', '운영체제 기록이 없습니다.')
+      loadRank('/stats/toprefs', 'ref-body', '유입 경로 기록이 없습니다.')
     ];
     // 하나가 실패해도 나머지는 그대로 보여준다.
     Promise.all(jobs.map(function(p){ return p.catch(function(){}); })).then(function(){
@@ -740,7 +727,7 @@ footer a{color:inherit;}
     if (on) clearNotice();
     $('setup-sec').hidden = !on;
     $('token-clear').hidden = on;
-    ['total-sec', 'daily-sec', 'ref-sec', 'env-sec'].forEach(function(id){ $(id).hidden = on; });
+    ['total-sec', 'daily-sec', 'ref-sec'].forEach(function(id){ $(id).hidden = on; });
     if (on) $('token-input').focus();
   }
 
