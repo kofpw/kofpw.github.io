@@ -1051,5 +1051,24 @@ footer{
 })();
 </script>
 
+<!-- 방문 통계 — GoatCounter(goatcounter.com).
+     화면에는 아무것도 그리지 않고 집계만 한다. 수치는 stats.html 에서 본다.
+     CODE 는 stats.html 의 것과 반드시 같아야 한다. -->
+<script>
+(function(){
+  var CODE = 'kofpw';   // https://{CODE}.goatcounter.com
+
+  // 로컬에서 열어본 것까지 집계되면 수치가 더러워진다.
+  var h = location.hostname;
+  if (location.protocol === 'file:' || !h || h === 'localhost' || h === '127.0.0.1') return;
+
+  var s = document.createElement('script');
+  s.async = true;
+  s.src = 'https://gc.zgo.at/count.js';
+  s.setAttribute('data-goatcounter', 'https://' + CODE + '.goatcounter.com/count');
+  document.head.appendChild(s);
+})();
+</script>
+
 </body>
 </html>
