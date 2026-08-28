@@ -321,9 +321,10 @@ h2{
 .work + .work{margin-top:15px;}
 /* 대표 항목 — 제목 자체를 강조 */
 .work.key + .work,.work + .work.key{margin-top:22px;}
+/* 대표 항목은 펼쳐진 것만으로 이미 구분되므로, 강조색은 쓰지 않고
+   크기·굵기로만 위계를 준다 (인쇄본은 전부 펼쳐지므로 이 차이가 필요하다) */
 .work.key .wt{
   font-size:15.5px;font-weight:700;letter-spacing:-.02em;
-  color:var(--accent);
 }
 .work.key .wt::before{width:7px;height:7px;top:.55em;}
 .work .wt{font-size:13.5px;font-weight:600;margin:0;padding-left:13px;position:relative;letter-spacing:-.005em;}
