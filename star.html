@@ -490,7 +490,7 @@ footer{
 
   <header class="masthead">
     <div class="reveal">
-      <p class="eyebrow">Client Programmer</p>
+      <p class="eyebrow" id="role">14년차 게임 클라이언트 프로그래머 (Unreal Engine)</p>
       <div class="namerow">
         <h1 class="name-ko">이윤석</h1>
         <span class="name-en">Yunseok Lee</span>
@@ -1044,6 +1044,10 @@ footer{
   var y = Math.floor(m / 12), r = m % 12;
   var el = document.getElementById('tenure');
   if (el) el.textContent = '재직 중 · ' + y + '년' + (r ? ' ' + r + '개월' : '');
+
+  // 상단 한 줄 소개의 연차도 같은 값으로 채운다 (HTML 쪽 값은 폴백)
+  var role = document.getElementById('role');
+  if (role) role.textContent = y + '년차 게임 클라이언트 프로그래머 (Unreal Engine)';
 
   var up = document.getElementById('updated');
   if (up) up.textContent = 'Updated ' + now.getFullYear() + '.' + String(now.getMonth() + 1).padStart(2, '0');
