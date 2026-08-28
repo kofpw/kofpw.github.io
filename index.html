@@ -138,8 +138,9 @@ body{
 
 /* ================= header ================= */
 .masthead{display:grid;grid-template-columns:minmax(0,1fr) clamp(170px,20vw,215px);gap:34px;align-items:start;}
+/* 한 줄 소개가 한글이라, 영문 라벨용 자간·대문자 변환은 쓰지 않는다 */
 .eyebrow{
-  font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
+  font-size:13px;font-weight:600;letter-spacing:.04em;
   color:var(--accent);margin:0 0 20px;
 }
 .namerow{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;}
@@ -319,9 +320,10 @@ h2{
 .work + .work{margin-top:15px;}
 /* 대표 항목 — 제목 자체를 강조 */
 .work.key + .work,.work + .work.key{margin-top:22px;}
+/* 대표 항목은 펼쳐진 것만으로 이미 구분되므로, 강조색은 쓰지 않고
+   크기·굵기로만 위계를 준다 (인쇄본은 전부 펼쳐지므로 이 차이가 필요하다) */
 .work.key .wt{
   font-size:15.5px;font-weight:700;letter-spacing:-.02em;
-  color:var(--accent);
 }
 .work.key .wt::before{width:7px;height:7px;top:.55em;}
 .work .wt{font-size:13.5px;font-weight:600;margin:0;padding-left:13px;position:relative;letter-spacing:-.005em;}
@@ -329,6 +331,57 @@ h2{
 .work ul{list-style:none;margin:5px 0 0;padding:0 0 0 13px;}
 .work li{font-size:13.5px;color:var(--ink);line-height:1.78;padding-left:12px;position:relative;}
 .work li::before{content:"\2013";position:absolute;left:0;color:var(--muted);}
+
+/* 접히는 작업 항목 — 대표 항목은 펼친 채 두고 나머지만 접는다.
+   접힌 상태에서도 결과 한 줄은 보이게 해, 펼치지 않아도 성과가 전달되도록 한다. */
+.work.fold > summary{
+  display:block;list-style:none;cursor:pointer;
+  padding:5px 9px 6px;margin:-5px -9px -6px;   /* 호버 배경이 글자에 붙지 않도록 */
+  border-radius:3px;
+  transition:background-color .18s ease;
+  -webkit-tap-highlight-color:transparent;
+}
+.work.fold > summary::-webkit-details-marker{display:none;}
+.work.fold > summary:hover{background:var(--tint-hover);}
+.work.fold > summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+.work.fold .wt{display:block;}
+/* 펼침 표시는 제목 바로 옆에 둔다 — 멀리 떨어뜨리면 제목과 연결되지 않는다 */
+.work.fold .wt::after{
+  content:"";display:inline-block;width:7px;height:7px;
+  margin-left:10px;vertical-align:3px;
+  border-right:1.75px solid var(--ink-2);border-bottom:1.75px solid var(--ink-2);
+  transform:rotate(45deg);transform-origin:50% 50%;
+  transition:transform .25s ease,border-color .18s ease;
+}
+.work.fold[open] .wt::after{transform:rotate(-135deg);}
+.work.fold > summary:hover .wt{color:var(--accent);}
+.work.fold > summary:hover .wt::after{border-color:var(--accent);}
+.work.fold .tease{
+  display:block;margin:4px 0 0;padding-left:13px;
+  font-size:12.5px;line-height:1.7;color:var(--ink-2);
+  transition:color .18s ease;
+}
+/* 펼치면 아래 결과 문장과 겹치므로 감춘다 */
+.work.fold[open] .tease{display:none;}
+
+/* 프로젝트별 일괄 펼침 토글 */
+.fold-all{
+  display:inline-flex;align-items:center;gap:7px;
+  margin:14px 0 0;padding:6px 11px;
+  background:none;border:1px solid var(--rule);border-radius:999px;
+  color:var(--muted);cursor:pointer;
+  font-family:inherit;font-size:11px;font-weight:600;letter-spacing:.02em;
+  transition:color .18s ease,border-color .18s ease;
+}
+.fold-all:hover{color:var(--accent);border-color:var(--accent);}
+.fold-all:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+.fold-all::after{
+  content:"";width:6px;height:6px;
+  border-right:1.6px solid currentColor;border-bottom:1.6px solid currentColor;
+  transform:rotate(45deg) translate(-1px,-1px);
+  transition:transform .25s ease;
+}
+.fold-all[data-open="1"]::after{transform:rotate(-135deg) translate(-1px,-1px);}
 
 /* ================= press ================= */
 .press{
@@ -399,6 +452,11 @@ footer{
   .toolbar,.toc,footer{display:none!important;}
   .reveal{opacity:1!important;transform:none!important;animation:none!important;}
   .sec{margin-top:22px;padding-top:16px;}
+  /* 인쇄본에는 접힌 항목도 전문이 담겨야 한다 (JS 로도 펼치지만 폴백을 둔다) */
+  .work.fold .wt::after,.fold-all{display:none!important;}
+  .work.fold .tease{display:none!important;}
+  details.work.fold:not([open]) > *:not(summary){display:block!important;}
+  details.work.fold::details-content{content-visibility:visible!important;}
   h2,.item,.list li,.press,.proj-grid,.work,.shot,.cap{break-inside:avoid;}
   /* 제목만 페이지 끝에 남지 않도록 다음 내용과 붙임 */
   h2{break-after:avoid;page-break-after:avoid;}
@@ -478,7 +536,7 @@ footer{
 
   <header class="masthead">
     <div class="reveal">
-      <p class="eyebrow">Client Programmer</p>
+      <p class="eyebrow" id="role">14년차 게임 클라이언트 프로그래머 (Unreal Engine)</p>
       <div class="namerow">
         <h1 class="name-ko">이윤석</h1>
         <span class="name-en">Yunseok Lee</span>
@@ -610,8 +668,11 @@ footer{
           </ul>
           <p class="res">컨텐츠 단위 ON/OFF가 운영 중 즉시 가능해졌고, 담당자별 작업 영역이 모듈 경계로 나뉘어 의존성과 충돌이 줄었습니다.</p>
         </div>
-        <div class="work">
-          <p class="wt">챕터별 보스전 개발</p>
+        <details class="work fold">
+          <summary>
+            <span class="wt">챕터별 보스전 개발</span>
+            <span class="tease">테이블 데이터와 시퀀스 애셋 추가만으로 신규 보스 확장</span>
+          </summary>
           <p class="ctx">챕터마다 연출과 진행 규칙이 다른 보스전을 계속 추가해야 했습니다. 보스별 연출을 코드에 하드코딩하지 않고 데이터로 구성할 수 있어야 했습니다.</p>
           <ul>
               <li>보스전 전용 테이블 스키마 설계</li>
@@ -619,9 +680,12 @@ footer{
               <li>보스전 진입 시 사용하는 전용 Indicator UI 구현 및 연동</li>
           </ul>
           <p class="res">신규 보스를 테이블 데이터와 시퀀스 애셋 추가만으로 확장할 수 있는 형태로 정리했습니다.</p>
-        </div>
-        <div class="work">
-          <p class="wt">인게임 컨텐츠 개발</p>
+        </details>
+        <details class="work fold">
+          <summary>
+            <span class="wt">인게임 컨텐츠 개발</span>
+            <span class="tease">성장·수집·경쟁 컨텐츠 5종 단독 완결, 렌더 타겟 1/3로 절감</span>
+          </summary>
           <p class="ctx">방치형 게임 특성상 성장·수집·경쟁 축의 컨텐츠를 지속적으로 늘려야 했습니다. 각 컨텐츠를 데이터 설계부터 서버 연동, UI까지 한 사람이 완결해야 하는 역할을 맡았습니다.</p>
           <ul>
               <li>펫, 마법인형, 길드, 내공 시스템, 그룹 경쟁 시스템 등 개발</li>
@@ -629,45 +693,60 @@ footer{
               <li>그룹 경쟁 시스템은 랭커 3인의 메쉬를 위젯에 표시하기 위해 SceneCapture로 텍스처 한 장에 캡처한 뒤 머티리얼에서 3등분해 출력</li>
           </ul>
           <p class="res">서로 다른 축의 컨텐츠 다섯 종을 단독으로 완결했고, 랭커 표시는 캐릭터별 캡처 대신 한 장으로 묶어 렌더 타겟 수를 3분의 1로 줄였습니다.</p>
-        </div>
-        <div class="work">
-          <p class="wt">캐릭터 FSM 개선</p>
+        </details>
+        <details class="work fold">
+          <summary>
+            <span class="wt">캐릭터 FSM 개선</span>
+            <span class="tease">루트모션 상태이상의 이동 거리를 기획 데이터로 조절</span>
+          </summary>
           <p class="ctx">상태이상의 종류가 늘어나면서, 하나의 State로 묶어 처리하던 방식으로는 각기 다른 동작을 표현하기 어려워졌습니다. 상태이상별 동작 차이를 코드 분기 대신 데이터로 제어할 수 있어야 했습니다.</p>
           <ul>
               <li>상태이상 State를 특성에 따라 세분화해 관리</li>
               <li>루트모션 기반 상태이상은 데이터 입력값에 따라 루트모션 길이를 제어하는 기능 추가</li>
           </ul>
           <p class="res">밀려남·띄우기처럼 루트모션을 쓰는 상태이상의 이동 거리를 기획 데이터로 조절할 수 있게 되었습니다.</p>
-        </div>
-        <div class="work">
-          <p class="wt">UI 흐름 정리 및 일원화</p>
+        </details>
+        <details class="work fold">
+          <summary>
+            <span class="wt">UI 흐름 정리 및 일원화</span>
+            <span class="tease">활성 컨텐츠를 한 곳에서 판단해 컨텐츠별 예외 코드 제거</span>
+          </summary>
           <p class="ctx">컨텐츠가 UI만으로 이루어지는 경우가 많은데, 현재 어떤 컨텐츠가 동작 중인지 알 수 있는 수단이 없어 컨텐츠 개발에 제약이 있음을 확인했습니다. 활성 컨텐츠를 한 곳에서 파악할 수 있도록 UI 진입 경로를 하나로 모아야 했습니다.</p>
           <ul>
               <li>Widget Activate를 각 컨텐츠 코드에서 개별 호출하지 않고 ContentManager를 거치도록 정리</li>
               <li>이 클래스에서 활성 컨텐츠를 파악할 수 있도록 구현</li>
           </ul>
           <p class="res">중복 진입 차단이나 조건부 노출처럼 컨텐츠 간 상호작용이 필요한 처리를, 컨텐츠마다 예외 코드를 넣지 않고 한 곳에서 판단할 수 있게 되었습니다.</p>
-        </div>
-        <div class="work">
-          <p class="wt">BP 그래프 노드를 C++ 코드로 일괄 변환</p>
+        </details>
+        <details class="work fold">
+          <summary>
+            <span class="wt">BP 그래프 노드를 C++ 코드로 일괄 변환</span>
+            <span class="tease">AI 로 애셋 약 200개를 C++ 로 이관, 디버깅 가능한 상태로</span>
+          </summary>
           <p class="ctx">빠른 프로토타이핑용으로 만든 BP 그래프 노드가 장기간 방치되거나 편의상 계속 쓰이면서, 디버깅이 불편하고 코드 흐름 파악이 어려워지는 문제가 있었습니다. 대상 애셋이 많아 수작업으로 하나씩 옮기기에는 비용이 커, 정리 과정을 자동화할 방법이 필요했습니다.</p>
           <ul>
               <li>Claude Code로 BP 그래프 노드가 있는 애셋을 검색</li>
               <li>노드를 자연어로 익스포트한 뒤, 그 파일을 C++ 코드로 변환하는 방식으로 정리</li>
           </ul>
           <p class="res">BP 그래프 노드가 방치돼 있던 애셋 약 200개를 C++ 코드로 옮겼습니다. 손이 많이 가지만 판단이 단순한 정리 작업을 AI에 넘긴 덕에, 흩어져 있던 로직이 C++로 모이면서 디버깅과 코드 추적이 가능한 상태가 되었습니다.</p>
-        </div>
-        <div class="work">
-          <p class="wt">PSO 캐시 파이프라인 구성</p>
+        </details>
+        <details class="work fold">
+          <summary>
+            <span class="wt">PSO 캐시 파이프라인 구성</span>
+            <span class="tease">수집을 자동화해 빌드마다 최신 PSO 캐시를 배포</span>
+          </summary>
           <p class="ctx">모바일 플랫폼에서 셰이더가 최초 사용 시점에 컴파일되면서 발생하는 순간 끊김을 줄이려면 PSO 캐시가 필요했습니다. 게임에 등장하는 모든 레벨과 액터를 사람이 직접 돌며 수집하기는 어려워, 수집 과정 자체를 자동화해야 했습니다.</p>
           <ul>
               <li>PSO 수집 전용 레벨을 구성</li>
               <li>스크립트로 게임에 등장하는 모든 레벨과 액터를 순차 스폰해 PSO를 수집한 뒤 배포에 활용</li>
           </ul>
           <p class="res">수집을 사람 손에서 떼어내, 빌드마다 최신 상태로 갱신된 PSO 캐시를 배포에 포함할 수 있게 되었습니다.</p>
-        </div>
-        <div class="work">
-          <p class="wt">팀장 역할 수행</p>
+        </details>
+        <details class="work fold">
+          <summary>
+            <span class="wt">팀장 역할 수행</span>
+            <span class="tease">6명 규모 팀을 약 9개월, 컨벤션·코드 구조 가이드 정립</span>
+          </summary>
           <p class="ctx">클라이언트 개발과 함께 6명 규모 팀의 팀장을 약 9개월간 맡아, 구현과 팀 운영을 병행했습니다. 프로그래머 한 명이 컨텐츠 하나를 처음부터 끝까지 담당하는 구조라, 업무와 일정을 나누는 것과 별개로 구현 방식이 담당자마다 갈라지지 않게 잡아줄 기준이 필요했습니다.</p>
           <ul>
               <li>팀원 업무 분배 및 일정 관리</li>
@@ -675,9 +754,9 @@ footer{
               <li>팀원이 작성한 코드의 구조를 확인하고, 개선이 필요한 부분에 가이드 제시</li>
           </ul>
           <p class="res">컨벤션과 코드 구조 가이드를 팀의 공통 기준으로 세워, 컨텐츠마다 담당자가 다른 구조에서도 구현 방식이 갈라지지 않도록 했습니다.</p>
-        </div>
-      </div>
-    </article>
+        </details>
+          <button class="fold-all" type="button" data-open="0">상세 7개 모두 펼치기</button>
+        </div></article>
 
     <article class="proj" id="p-bc">
       <div class="proj-grid">
@@ -717,8 +796,11 @@ footer{
           </ul>
           <p class="res">크래시나 네트워크 단절로 이탈해도 매치 복귀가 가능해졌고, 이탈 구간 동안 AI가 캐릭터를 대신 조작해 같은 팀의 플레이가 무너지지 않게 되었습니다.</p>
         </div>
-        <div class="work">
-          <p class="wt">전투 동기화 구조 개선</p>
+        <details class="work fold">
+          <summary>
+            <span class="wt">전투 동기화 구조 개선</span>
+            <span class="tease">반응성은 선행 실행, 정확성은 서버 확정 후 실행으로 분리</span>
+          </summary>
           <p class="ctx">난투형 대전 액션이라 입력 반응성과 액션성이 게임의 핵심인데, 서버 권한만으로 처리하면 반응이 늦어지는 구조적 제약이 있었습니다. 반응성과 서버 검증(신뢰성) 사이에서 액션별로 적절한 균형점을 잡아야 했습니다.</p>
           <ul>
               <li>입력 반응성과 액션성을 살리기 위해 유저 입력에 따른 액션을 클라이언트에서 먼저 수행하고 서버가 검증하는 구조로 구현</li>
@@ -727,9 +809,12 @@ footer{
               <li>이 방식이 버그를 유발한다는 의견이 있어, 일부 공격은 클라이언트가 요청하고 서버 검증이 끝난 뒤 알림을 받아 실행하는 형태로 변경</li>
           </ul>
           <p class="res">반응성이 중요한 액션은 선행 실행으로, 정확성이 중요한 공격은 서버 확정 후 실행으로 나눠, 체감 반응성과 검증 신뢰성을 동시에 확보했습니다.</p>
-        </div>
-        <div class="work">
-          <p class="wt">레벨 프랍 배치 시스템 구성</p>
+        </details>
+        <details class="work fold">
+          <summary>
+            <span class="wt">레벨 프랍 배치 시스템 구성</span>
+            <span class="tease">레벨 저장 시 Validation 으로 배치 오류를 사전 차단</span>
+          </summary>
           <p class="ctx">여러 레벨에 다양한 오브젝트가 배치되면서, 규격에서 벗어난 배치가 지형 파괴·전투 로직과 어긋나는 위험이 있었습니다. 프랍을 규격화하고, 잘못된 배치를 사람이 아니라 도구가 먼저 잡아내도록 만들어야 했습니다.</p>
           <ul>
               <li>레벨에 배치되는 모든 오브젝트를 직접 구현한 액터 클래스 기반 BP로만 배치하도록 제한해 프랍을 규격화</li>
@@ -737,9 +822,12 @@ footer{
               <li>레벨 저장 시 맵 체크로 룰에 맞지 않는 프랍을 에디터에서 발견하고 수정할 수 있도록 Validation 기능 지원</li>
           </ul>
           <p class="res">규칙을 어긴 배치가 레벨 저장 시점에 에디터에서 바로 드러나, 런타임까지 넘어가던 배치 오류를 사전에 차단했습니다.</p>
-        </div>
-        <div class="work">
-          <p class="wt">기존 캐릭터 리뉴얼 및 신규 캐릭터 구현</p>
+        </details>
+        <details class="work fold">
+          <summary>
+            <span class="wt">기존 캐릭터 리뉴얼 및 신규 캐릭터 구현</span>
+            <span class="tease">밸런스 조정이 기획자 선에서 가능해져 튜닝 사이클 단축</span>
+          </summary>
           <p class="ctx">캐릭터마다 액션 구성이 달라, 캐릭터가 늘어날수록 개별 구현과 수정 비용이 함께 늘어나는 구조였습니다. 캐릭터 추가·수정 비용을 낮추고, 기획자가 데이터로 직접 조절할 수 있는 범위를 넓혀야 했습니다.</p>
           <ul>
               <li>캐릭터별 액션을 클래스화하고, 이를 사용한 BP를 캐릭터 BP에 연결하는 구조로 정리</li>
@@ -747,35 +835,44 @@ footer{
               <li>AnimMontage의 커스텀 AnimNotify로 대미지 구간, 무적 구간 등 캐릭터별 이벤트를 기획자가 직접 데이터로 입력할 수 있도록 지원</li>
           </ul>
           <p class="res">대미지·무적 타이밍 같은 밸런스 조정이 프로그래머 수정 없이 기획자 선에서 가능해져, 캐릭터 튜닝 사이클이 짧아졌습니다.</p>
-        </div>
-        <div class="work">
-          <p class="wt">신규 게임 모드 구현</p>
+        </details>
+        <details class="work fold">
+          <summary>
+            <span class="wt">신규 게임 모드 구현</span>
+            <span class="tease">출전·승패 규칙이 다른 두 개 모드를 서비스에 추가</span>
+          </summary>
           <p class="ctx">기본 배틀로얄 외에 플레이 방식이 다른 모드를 추가로 제공해야 했습니다. 기존 진행 구조를 재사용하면서 모드별 출전·승패 규칙을 새로 얹어야 했습니다.</p>
           <ul>
               <li>난투(플레이어당 캐릭터 3개를 골라 순차 출전), 듀얼(1:1 대전) 모드의 GameMode, GameState, PlayerController 등 진행 기본 룰 구현</li>
           </ul>
           <p class="res">출전 방식과 승패 판정이 서로 다른 두 개 모드를 서비스에 추가했습니다.</p>
-        </div>
-        <div class="work">
-          <p class="wt">입력 시스템 구현</p>
+        </details>
+        <details class="work fold">
+          <summary>
+            <span class="wt">입력 시스템 구현</span>
+            <span class="tease">모바일·스위치·게임패드·PC 입력을 한 계층으로 통합</span>
+          </summary>
           <p class="ctx">여러 플랫폼 간 크로스 플레이를 제공해, 모바일·콘솔·PC의 입력 체계가 하나의 코드베이스 안에 함께 존재했습니다. 플랫폼별 분기가 전투 코드 전반에 퍼지지 않도록 입력 처리를 한곳으로 모아야 했습니다.</p>
           <ul>
               <li>모바일, 닌텐도 스위치, 게임패드, 키보드/마우스별 입력 방식과 키보드/마우스의 여러 입력 모드 구현</li>
               <li>유저 입력을 매 Tick 캐시해두고 현재 State와 조준 상태에 따라 처리하도록 계층 구조 정립</li>
           </ul>
           <p class="res">입력 해석이 한 계층에 모여, 플랫폼이나 입력 모드가 늘어도 전투 로직을 건드리지 않고 입력 계층만 확장하면 되는 구조가 되었습니다.</p>
-        </div>
-        <div class="work">
-          <p class="wt">Jenkins 빌드 환경 구성</p>
+        </details>
+        <details class="work fold">
+          <summary>
+            <span class="wt">Jenkins 빌드 환경 구성</span>
+            <span class="tease">3개 플랫폼 병렬 빌드로 약 1시간 → 약 20분</span>
+          </summary>
           <p class="ctx">윈도우·안드로이드·iOS 빌드를 한 머신에서 순차로 처리하고 있어, 플랫폼 수만큼 대기 시간이 쌓였습니다. 다양한 플랫폼 빌드를 더 빠르게 처리하고, 결과 공유까지 자동화해야 했습니다.</p>
           <ul>
               <li>사용 가능한 빌드 머신을 각각 agent로 등록하고, 빌드 과정을 Task로 나눈 뒤 Pipeline으로 조합</li>
               <li>빌드 완료 시 Webhook으로 MS Teams 채널에 알림</li>
           </ul>
           <p class="res">세 플랫폼 빌드를 각 머신에서 동시에 처리하게 되면서, 전체 빌드 시간이 세 플랫폼을 더한 시간에서 한 번의 빌드 시간 수준으로 줄었습니다. 빌드당 20분 기준으로 약 1시간에서 약 20분입니다. 완료 결과는 팀 채널에서 바로 확인할 수 있게 했습니다.</p>
-        </div>
-      </div>
-    </article>
+        </details>
+          <button class="fold-all" type="button" data-open="0">상세 6개 모두 펼치기</button>
+        </div></article>
 
     <article class="proj" id="p-lll">
       <div class="proj-grid">
@@ -813,17 +910,20 @@ footer{
           </ul>
           <p class="res">음성과 대본만 있으면 립싱크가 생성되고, 표정은 별도 레이어로 얹어 조합하는 구조를 만들어 다이얼로그 에디터의 자동 생성 기능을 뒷받침했습니다.</p>
         </div>
-        <div class="work">
-          <p class="wt">인게임 컨텐츠 구현</p>
+        <details class="work fold">
+          <summary>
+            <span class="wt">인게임 컨텐츠 구현</span>
+            <span class="tease">불의 전파와 폭발 파괴가 레벨 오브젝트 단위로 동작</span>
+          </summary>
           <p class="ctx">레벨 오브젝트와의 상호작용을 살린 전투 컨텐츠가 필요했습니다. 오브젝트 사이의 연쇄 반응을 게임 규칙으로 성립시켜야 했습니다.</p>
           <ul>
               <li>이화학 컨텐츠 — 오브젝트에 붙은 불이 다른 오브젝트로 옮겨 붙으며 피해를 주는 연계 컨텐츠 구현</li>
               <li>Blast 플러그인을 사용해 폭발 발생 시 배치된 레벨 오브젝트가 깨지며 날아가는 컨텐츠 구현</li>
           </ul>
           <p class="res">불의 전파와 폭발 파괴가 레벨 오브젝트 단위로 동작해, 배치만으로 환경 상호작용 상황을 구성할 수 있게 되었습니다.</p>
-        </div>
-      </div>
-    </article>
+        </details>
+          <button class="fold-all" type="button" data-open="0">상세 펼치기</button>
+        </div></article>
 
     <article class="proj" id="p-mxm">
       <div class="proj-grid">
@@ -842,8 +942,7 @@ footer{
       <div class="stack">
         <span class="chip">Gamebryo 2.6</span><span class="chip">Unreal Engine 4</span><span class="chip">C++</span><span class="chip">C#</span><span class="chip">Visual Studio</span><span class="chip">Perforce</span><span class="chip">CruiseControl.NET</span>
       </div>
-      <div class="works">
-        <div class="work">
+      <div class="works">        <div class="work">
           <p class="wt">NodeEditor 제작 및 유지보수</p>
           <p class="ctx">인게임 애니메이션 흐름과 레벨에서의 이벤트 흐름을 노드로 제어하는 개발 도구가 MFC로 구현돼 있었습니다. 현재의 UE4 Blueprint Graph와 유사한 형태의 도구입니다. 기존 도구를 대체하면서, 실제 사용자인 기획·아트 담당자가 쓰기 편한 수준으로 다시 만들어야 했습니다.</p>
           <ul>
@@ -854,24 +953,6 @@ footer{
           <p class="res">애니메이션과 레벨 이벤트 흐름을 기획·아트가 노드로 직접 구성하게 되었고, 출시까지 이어진 도구로 유지보수를 계속 담당했습니다.</p>
         </div>
         <div class="work">
-          <p class="wt">리소스 분석기 · 레벨이벤트 편집기 구현 및 유지보수</p>
-          <p class="ctx">게임에 사용된 리소스 현황을 한눈에 확인할 수단이 없었고, 레벨 이벤트를 NodeEditor로 만드는 방식은 비효율적이라고 판단했습니다. 리소스 현황을 공유 가능한 형태로 뽑아내고, 레벨 이벤트 제작 방식 자체를 바꿔야 했습니다.</p>
-          <ul>
-              <li>게임에 사용된 모든 리소스를 유형별로 분석해 툴에서 확인하고, 엑셀 파일로 Export하는 기능 구현</li>
-              <li>테이블 형태로 레벨 이벤트를 구성하는 전용 편집기를 별도 개발</li>
-          </ul>
-          <p class="res">리소스 현황을 엑셀로 공유할 수 있게 되었고, 레벨 이벤트는 노드 연결 대신 테이블 입력으로 제작하는 방식으로 전환했습니다.</p>
-        </div>
-        <div class="work">
-          <p class="wt">클라이언트–서버 전투 동기화 및 SFX·애니메이션 작업</p>
-          <p class="ctx">대부분의 로직이 서버에서 돌고 클라이언트가 받아 적용하는 구조여서, 입력에서 연출까지의 지연이 그대로 드러났습니다. 서버 권한 구조를 유지하면서 가장 빈번한 액션의 반응성과 연출 품질을 끌어올려야 했습니다.</p>
-          <ul>
-              <li>평타(약공격)만 클라이언트가 먼저 액션한 것을 서버에서 적용하도록 구현</li>
-              <li>캐릭터가 액션할 때 클라이언트에서 처리해야 할 SFX·애니메이션 재생 로직의 문제점을 파악하고 개선</li>
-          </ul>
-          <p class="res">가장 자주 쓰이는 평타의 반응 지연을 없애고, 액션 연출 재생 로직의 문제를 정리했습니다.</p>
-        </div>
-        <div class="work">
           <p class="wt">FX 재생·연동 처리 구현 — Gamebryo에서 UE4까지</p>
           <p class="ctx">Gamebryo에서 재생할 규격으로 만들어진 FX 리소스를 클라이언트에서 캐릭터 액션과 인게임 상황에 맞는 지점에 뿌려질 수 있도록 연동하는 작업이 필요했습니다. 이후 프로젝트가 UE4로 전환되면서, 같은 출력이 컨버팅된 코드에서도 그대로 유지되어야 했습니다.</p>
           <ul>
@@ -880,8 +961,32 @@ footer{
           </ul>
           <p class="res">캐릭터 및 레벨 데이터에서 FX 리소스 경로만 입력하면 요구에 따라 FX가 출력되도록 해 FX를 입력하는 창구를 최소화했고, 엔진이 UE4로 바뀐 뒤에도 출력 위치가 그대로 유지되어 연출을 다시 잡지 않고 전환할 수 있었습니다.</p>
         </div>
-      </div>
-    </article>
+        <details class="work fold">
+          <summary>
+            <span class="wt">리소스 분석기 · 레벨이벤트 편집기 구현 및 유지보수</span>
+            <span class="tease">리소스 현황 엑셀 공유, 레벨 이벤트를 테이블 입력 방식으로 전환</span>
+          </summary>
+          <p class="ctx">게임에 사용된 리소스 현황을 한눈에 확인할 수단이 없었고, 레벨 이벤트를 NodeEditor로 만드는 방식은 비효율적이라고 판단했습니다. 리소스 현황을 공유 가능한 형태로 뽑아내고, 레벨 이벤트 제작 방식 자체를 바꿔야 했습니다.</p>
+          <ul>
+              <li>게임에 사용된 모든 리소스를 유형별로 분석해 툴에서 확인하고, 엑셀 파일로 Export하는 기능 구현</li>
+              <li>테이블 형태로 레벨 이벤트를 구성하는 전용 편집기를 별도 개발</li>
+          </ul>
+          <p class="res">리소스 현황을 엑셀로 공유할 수 있게 되었고, 레벨 이벤트는 노드 연결 대신 테이블 입력으로 제작하는 방식으로 전환했습니다.</p>
+        </details>
+        <details class="work fold">
+          <summary>
+            <span class="wt">클라이언트–서버 전투 동기화 및 SFX·애니메이션 작업</span>
+            <span class="tease">가장 자주 쓰이는 평타의 반응 지연 제거</span>
+          </summary>
+          <p class="ctx">대부분의 로직이 서버에서 돌고 클라이언트가 받아 적용하는 구조여서, 입력에서 연출까지의 지연이 그대로 드러났습니다. 서버 권한 구조를 유지하면서 가장 빈번한 액션의 반응성과 연출 품질을 끌어올려야 했습니다.</p>
+          <ul>
+              <li>평타(약공격)만 클라이언트가 먼저 액션한 것을 서버에서 적용하도록 구현</li>
+              <li>캐릭터가 액션할 때 클라이언트에서 처리해야 할 SFX·애니메이션 재생 로직의 문제점을 파악하고 개선</li>
+          </ul>
+          <p class="res">가장 자주 쓰이는 평타의 반응 지연을 없애고, 액션 연출 재생 로직의 문제를 정리했습니다.</p>
+        </details>
+          <button class="fold-all" type="button" data-open="0">상세 2개 모두 펼치기</button>
+        </div></article>
   </section>
 
   <!-- 학력 -->
@@ -949,6 +1054,36 @@ footer{
     });
   }
 
+
+  // 프로젝트별 "모두 펼치기" — 접을 수 있는 문서라는 걸 알리고, 다 읽으려는 사람에게 출구가 된다
+  Array.prototype.forEach.call(document.querySelectorAll('.fold-all'), function(btn){
+    var scope = btn.closest('.works');
+    var items = Array.prototype.slice.call(scope.querySelectorAll('details.work.fold'));
+    function sync(){
+      var allOpen = items.every(function(d){ return d.open; });
+      btn.dataset.open = allOpen ? '1' : '0';
+      var one = items.length === 1;
+      btn.textContent = allOpen
+        ? (one ? '상세 접기' : '상세 모두 접기')
+        : (one ? '상세 펼치기' : '상세 ' + items.length + '개 모두 펼치기');
+    }
+    btn.addEventListener('click', function(){
+      var open = btn.dataset.open !== '1';
+      items.forEach(function(d){ d.open = open; });
+      sync();
+    });
+    items.forEach(function(d){ d.addEventListener('toggle', sync); });
+    sync();
+  });
+
+  // 인쇄·PDF 에는 접힌 항목까지 전부 담기도록 미리 펼쳤다가 되돌린다
+  var folds = Array.prototype.slice.call(document.querySelectorAll('details.work.fold'));
+  window.addEventListener('beforeprint', function(){
+    folds.forEach(function(d){ if (!d.open){ d.dataset.reopen = '1'; d.open = true; } });
+  });
+  window.addEventListener('afterprint', function(){
+    folds.forEach(function(d){ if (d.dataset.reopen){ d.open = false; delete d.dataset.reopen; } });
+  });
 
   // PDF 저장 — 인쇄용 스타일시트를 그대로 사용
   var pdfBtn = document.getElementById('pdf-btn');
@@ -1020,6 +1155,9 @@ footer{
   var y = Math.floor(m / 12), r = m % 12;
   var el = document.getElementById('tenure');
   if (el) el.textContent = '재직 중 · ' + y + '년' + (r ? ' ' + r + '개월' : '');
+  // 상단 한 줄 소개의 연차도 같은 값으로 채운다 (HTML 쪽 값은 폴백)
+  var role = document.getElementById('role');
+  if (role) role.textContent = y + '년차 게임 클라이언트 프로그래머 (Unreal Engine)';
 
   var up = document.getElementById('updated');
   if (up) up.textContent = 'Updated ' + now.getFullYear() + '.' + String(now.getMonth() + 1).padStart(2, '0');
