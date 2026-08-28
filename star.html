@@ -139,8 +139,9 @@ body{
 
 /* ================= header ================= */
 .masthead{display:grid;grid-template-columns:minmax(0,1fr) clamp(170px,20vw,215px);gap:34px;align-items:start;}
+/* 한 줄 소개가 한글이라, 영문 라벨용 자간·대문자 변환은 쓰지 않는다 */
 .eyebrow{
-  font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
+  font-size:11px;font-weight:600;letter-spacing:.04em;
   color:var(--accent);margin:0 0 20px;
 }
 .namerow{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;}
