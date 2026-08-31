@@ -472,7 +472,7 @@ footer{
   h2{break-after:avoid;page-break-after:avoid;}
   .hrow{break-after:avoid;page-break-after:avoid;}
   /* 짧은 후반부 섹션은 통째로 유지 */
-  #edu,#etc,#interview{break-inside:avoid;}
+  #personal,#edu,#etc,#interview{break-inside:avoid;}
   .letter{break-inside:avoid;}
   .shot img{transform:none!important;}
   .stack .chip{background:#fff;}
@@ -515,6 +515,7 @@ footer{
         <li class="sub"><a href="#p-bc">Battle Crush</a></li>
         <li class="sub"><a href="#p-lll">Project LLL</a></li>
         <li class="sub"><a href="#p-mxm">Master X Master</a></li>
+        <li><a href="#personal">개인 프로젝트</a></li>
         <li><a href="#edu">학력</a></li>
         <li><a href="#etc">활동 · 입상</a></li>
         <li><a href="#interview">인터뷰</a></li>
@@ -999,6 +1000,30 @@ footer{
         </details>
           <button class="fold-all" type="button" data-open="0">상세 2개 모두 펼치기</button>
         </div></article>
+  </section>
+
+  <!-- 개인 프로젝트 -->
+  <section class="sec" id="personal">
+    <h2>개인 프로젝트</h2>
+    <div class="item">
+      <div class="hrow">
+        <h3>직관 기록 라이브러리</h3>
+        <span class="period">2026 — 진행 중</span>
+      </div>
+      <p class="sub">기록 · 입력 도구 · 조회 페이지 단독 제작</p>
+    </div>
+    <div class="works">
+      <div class="work">
+        <p class="ctx">직관을 다니다 "내가 본 경기에서 이 선수는 어땠나"가 궁금해졌는데, 기존 기록 사이트는 시즌 전체 기준이라 원하는 형태로 볼 수 없었습니다.</p>
+        <ul>
+            <li>경기장에서 촬영한 영상을 보며 타석 단위로 직접 기록 — 크롤링이나 외부 API를 쓰지 않았습니다</li>
+            <li>반복 입력을 줄이기 위해 기록 입력 도구를 별도로 제작</li>
+            <li>쌓인 기록을 선수별로 모아 보는 페이지 구현</li>
+            <li>입력 도구와 페이지 모두 Claude Code로 제작</li>
+        </ul>
+        <p class="res">약 90경기 분량의 타석 기록을 직접 쌓아 운영 중입니다. 회사 밖에서도 필요한 도구가 없으면 만들어 쓰는 방식으로 진행했습니다.</p>
+      </div>
+    </div>
   </section>
 
   <!-- 학력 -->
