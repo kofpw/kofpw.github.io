@@ -148,6 +148,8 @@ h2{
 h2 .note{
   font-size:10.5px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);
 }
+/* 제목 오른쪽에 보조 표시(단위 안내 + 기간 선택)를 나란히 둔다 */
+h2 .aux{display:inline-flex;align-items:center;gap:12px;flex-wrap:wrap;}
 
 /* ================= 총 방문 ================= */
 .totals{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);}
@@ -155,6 +157,7 @@ h2 .note{
 .tot .k{font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 8px;}
 .tot .v{font-size:clamp(26px,4vw,34px);font-weight:700;line-height:1.1;letter-spacing:-.02em;margin:0;color:var(--ink);}
 .tot .v.dim{color:var(--faint);font-weight:500;font-size:20px;}
+.tot .s{font-size:10.5px;font-weight:500;letter-spacing:.04em;color:var(--faint);margin:7px 0 0;}
 
 /* ================= 일별 추이 ================= */
 .chart{
@@ -338,33 +341,36 @@ footer a{color:inherit;}
 
   <!-- 총 방문 -->
   <section class="sec" id="total-sec">
-    <h2>
-      <span>총 방문</span>
-      <span class="range" id="range" role="group" aria-label="기간 선택">
-        <button type="button" data-days="7" aria-pressed="false">7일</button>
-        <button type="button" data-days="30" aria-pressed="true">30일</button>
-        <button type="button" data-days="90" aria-pressed="false">90일</button>
-        <button type="button" data-days="0" aria-pressed="false">전체</button>
-      </span>
-    </h2>
+    <h2><span>방문 수</span><span class="note">Pageviews</span></h2>
     <div id="total-body">
       <div class="totals">
-        <div class="tot"><p class="k">Pageviews</p><p class="v dim" id="v-views">—</p></div>
-        <div class="tot"><p class="k">Per day</p><p class="v dim" id="v-perday">—</p></div>
-        <div class="tot"><p class="k">Peak day</p><p class="v dim" id="v-peak">—</p></div>
+        <div class="tot"><p class="k">Today</p><p class="v dim" id="v-today">—</p><p class="s" id="s-today"></p></div>
+        <div class="tot"><p class="k">Weekly</p><p class="v dim" id="v-week">—</p><p class="s" id="s-week"></p></div>
+        <div class="tot"><p class="k">Monthly</p><p class="v dim" id="v-month">—</p><p class="s" id="s-month"></p></div>
       </div>
     </div>
   </section>
 
   <!-- 일별 추이 -->
   <section class="sec" id="daily-sec">
-    <h2><span>일별 추이</span><span class="note" id="daily-note"></span></h2>
+    <h2>
+      <span>일별 추이</span>
+      <span class="aux">
+        <span class="note" id="daily-note"></span>
+        <span class="range" id="range" role="group" aria-label="기간 선택">
+          <button type="button" data-days="7" aria-pressed="false">7일</button>
+          <button type="button" data-days="30" aria-pressed="true">30일</button>
+          <button type="button" data-days="90" aria-pressed="false">90일</button>
+          <button type="button" data-days="0" aria-pressed="false">전체</button>
+        </span>
+      </span>
+    </h2>
     <div id="daily-body"><p class="skel">불러오는 중…</p></div>
   </section>
 
   <!-- 유입 경로 -->
   <section class="sec" id="ref-sec">
-    <h2><span>유입 경로</span><span class="note">Referrers</span></h2>
+    <h2><span>유입 경로</span><span class="note" id="ref-note">Referrers</span></h2>
     <div id="ref-body"><p class="skel">불러오는 중…</p></div>
   </section>
 
@@ -606,18 +612,43 @@ footer a{color:inherit;}
   function joinQ(p, extra){
     return p ? p + '&' + extra : '?' + extra;
   }
+  function rangeLabel(){
+    return days ? ('최근 ' + days + '일') : '전체';
+  }
+  // 상단 요약(오늘/주간/월간)은 기간 선택과 무관하게 늘 같은 값을 보여야 한다.
+  // 그래서 시계열은 항상 최근 30일까지는 덮도록 받아 오고, 차트만 선택 구간으로 자른다.
+  function overviewStart(){
+    var sel = days ? ymd(daysAgo(days - 1)) : '2000-01-01';
+    var month = ymd(daysAgo(29));
+    return sel < month ? sel : month;   // ISO 날짜라 문자열 비교로 충분하다
+  }
+  function sumSince(series, from){
+    var n = 0;
+    for (var i = 0; i < series.length; i++){
+      if (series[i].day >= from) n += series[i].count;
+    }
+    return n;
+  }
 
   /* ================= 패널 ================= */
   // /stats/total 한 번으로 합계와 일별 시계열을 모두 받는다.
   // 응답: { total, total_events, total_utc, stats:[{ day, daily, hourly }] }
+  var TOTALS_HTML = $('total-body').innerHTML;
+
   function loadOverview(){
-    var vv = $('v-views'), vp = $('v-perday'), vk = $('v-peak');
-    [vv, vp, vk].forEach(function(el){ el.textContent = '…'; el.classList.add('dim'); });
+    $('total-body').innerHTML = TOTALS_HTML;
+    var vt = $('v-today'), vw = $('v-week'), vm = $('v-month');
+    [vt, vw, vm].forEach(function(el){ el.textContent = '…'; el.classList.add('dim'); });
     $('daily-body').innerHTML = '<p class="skel">불러오는 중…</p>';
 
-    return api('/stats/total' + period()).then(function(j){
-      var total = pickNum(j, ['total'], 0);
+    var today = ymd(new Date());
+    var week  = ymd(daysAgo(6));    // 오늘 포함 7일
+    var month = ymd(daysAgo(29));   // 오늘 포함 30일
+    $('s-today').textContent = today;
+    $('s-week').textContent  = week + ' – ' + today;
+    $('s-month').textContent = month + ' – ' + today;
 
+    return api('/stats/total?start=' + overviewStart()).then(function(j){
       // 일별 시계열
       var series = [];
       if (j && Array.isArray(j.stats)){
@@ -630,17 +661,13 @@ footer a{color:inherit;}
         series.sort(function(a, b){ return a.day < b.day ? -1 : 1; });
       }
 
-      var peak = 0;
-      for (var k = 0; k < series.length; k++) peak = Math.max(peak, series[k].count);
+      setTile(vt, sumSince(series, today));
+      setTile(vw, sumSince(series, week));
+      setTile(vm, sumSince(series, month));
 
-      setTile(vv, total);
-      setTile(vk, series.length ? peak : null);
-
-      // 기간이 '전체'면 실제 집계된 일수로 나눈다.
-      var span = days || series.length;
-      setTile(vp, (total !== null && span) ? Math.round(total / span * 10) / 10 : null);
-
-      renderChart(series);
+      // 차트는 선택한 기간만 그린다.
+      var from = days ? ymd(daysAgo(days - 1)) : '';
+      renderChart(from ? series.filter(function(r){ return r.day >= from; }) : series);
     }).catch(function(e){
       renderError($('total-body'), e);
       renderError($('daily-body'), e);
@@ -693,7 +720,14 @@ footer a{color:inherit;}
       '<div class="chart">' + bars + '</div>' +
       '<div class="axis"><span>' + esc(series[0].day) + '</span>' +
       '<span>' + esc(series[series.length - 1].day) + '</span></div>';
-    note.textContent = rows.length + '개 구간 · ' + b.unit + ' 단위';
+    var sum = 0, dayMax = 0;
+    for (var n = 0; n < series.length; n++){
+      sum += series[n].count;
+      dayMax = Math.max(dayMax, series[n].count);
+    }
+    note.textContent = rangeLabel() + ' · 합계 ' + num(sum) +
+                       ' · 하루 최고 ' + num(dayMax) +
+                       ' · ' + b.unit + ' 단위';
   }
 
   function loadRank(path, elId, emptyMsg){
@@ -720,6 +754,7 @@ footer a{color:inherit;}
       loadOverview(),
       loadRank('/stats/toprefs', 'ref-body', '유입 경로 기록이 없습니다.')
     ];
+    $('ref-note').textContent = 'Referrers · ' + rangeLabel();
     // 하나가 실패해도 나머지는 그대로 보여준다.
     Promise.all(jobs.map(function(p){ return p.catch(function(){}); })).then(function(){
       if (reloadBtn) reloadBtn.classList.remove('busy');
