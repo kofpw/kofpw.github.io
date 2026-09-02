@@ -225,7 +225,8 @@ h2 .aux{display:inline-flex;align-items:center;gap:12px;flex-wrap:wrap;}
 .setup{border:1px solid var(--rule);background:var(--tint);padding:22px 24px;}
 .setup h3{font-size:14px;font-weight:700;margin:0 0 12px;color:var(--ink);}
 .setup ol{margin:0 0 18px;padding-left:20px;font-size:13.5px;color:var(--ink-2);line-height:1.85;}
-.setup ol code{
+.setup ol code,
+.setup p code{
   font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
   font-size:12px;background:var(--surface);border:1px solid var(--rule);padding:1px 5px;
 }
@@ -372,6 +373,22 @@ footer a{color:inherit;}
   <section class="sec" id="ref-sec">
     <h2><span>유입 경로</span><span class="note" id="ref-note">Referrers</span></h2>
     <div id="ref-body"><p class="skel">불러오는 중…</p></div>
+  </section>
+
+  <!-- 내 방문 제외 : 확인하러 들어간 방문이 수치에 섞이지 않게 한다 -->
+  <section class="sec" id="skip-sec">
+    <h2><span>내 방문 제외</span><span class="note">This browser</span></h2>
+    <div class="setup">
+      <h3 id="skip-state">확인 중…</h3>
+      <p class="skel" style="margin:0 0 18px">
+        페이지를 확인하러 들어간 방문까지 통계에 잡히지 않도록, 이 브라우저에서 발생한 방문을 집계에서 뺍니다.
+        설정은 이 브라우저에만 남으므로 다른 기기·다른 브라우저·시크릿 창에서는 각각 한 번씩 걸어야 합니다.
+        이력서 페이지를 <code>index.html?nocount</code> 로 열어도 같은 효과이고, <code>?docount</code> 로 되돌립니다.
+      </p>
+      <div class="field">
+        <button class="btn" id="skip-toggle" type="button">집계에서 빼기</button>
+      </div>
+    </div>
   </section>
 
   <footer>
@@ -796,6 +813,38 @@ footer a{color:inherit;}
     });
     loadAll();
   });
+
+  /* ================= 내 방문 제외 =================
+     'skipgc' 는 GoatCounter 가 공식으로 보는 키다. index.html 의 집계 스크립트가
+     같은 값을 읽어 요청 자체를 보내지 않고, count.js 도 같은 키를 존중한다.
+     localStorage 는 출처 단위라 이 페이지에서 쓴 값이 index.html 에도 그대로 걸린다. */
+  (function(){
+    var SKIP = 'skipgc';
+    var stateEl = $('skip-state'), btn = $('skip-toggle');
+
+    function skipping(){
+      try{ return localStorage.getItem(SKIP) === 't'; }catch(e){ return false; }
+    }
+    function render(){
+      var off = skipping();
+      stateEl.textContent = off ? '이 브라우저의 방문은 집계되지 않습니다'
+                                : '이 브라우저의 방문도 집계되고 있습니다';
+      btn.textContent  = off ? '다시 집계하기' : '집계에서 빼기';
+      btn.className    = off ? 'btn ghost' : 'btn';
+    }
+
+    btn.addEventListener('click', function(){
+      var on = !skipping();
+      try{ on ? localStorage.setItem(SKIP, 't') : localStorage.removeItem(SKIP); }
+      catch(e){
+        stateEl.textContent = '이 브라우저가 저장소를 막고 있어 설정을 저장하지 못했습니다';
+        return;
+      }
+      render();
+    });
+
+    render();
+  })();
 
   // 대시보드 링크를 실제 사이트 코드로 맞춘다.
   $('gc-dash').href = BASE;
