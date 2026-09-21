@@ -514,8 +514,8 @@ a.pill{text-decoration:none;}
 .more .arrow{font-size:10.5px;}
 
 @media print{
-  /* 종이에서는 다른 문서로 가는 링크가 의미 없다 */
-  .more{display:none!important;}
+  /* 종이에는 눌러 갈 곳이 없으니 다른 문서로 보내는 안내는 모두 뺀다 */
+  .more,.only-screen{display:none!important;}
   .doc-kind{color:var(--muted);}
 }
 </style>
@@ -666,7 +666,7 @@ a.pill{text-decoration:none;}
   <!-- 프로젝트 -->
   <section class="sec" id="projects">
     <h2>프로젝트</h2>
-    <p class="lead">참여한 프로젝트와 맡은 역할을 정리했습니다. 각 프로젝트에서 어떤 문제를 어떻게 풀었는지는 <a href="career.html">경력기술서</a>에 따로 정리해 두었습니다.</p>
+    <p class="lead">참여한 프로젝트와 맡은 역할을 정리했습니다.<span class="only-screen"> 각 프로젝트에서 어떤 문제를 어떻게 풀었는지는 <a href="career.html">경력기술서</a>에 따로 정리해 두었습니다.</span></p>
 
     <article class="proj" id="p-bsidle">
       <div class="proj-grid solo">
