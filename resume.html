@@ -451,7 +451,6 @@ footer{
   .sheet{box-shadow:none;margin:0;padding:0;max-width:none;}
   .toolbar,.toc,footer{display:none!important;}
   .reveal{opacity:1!important;transform:none!important;animation:none!important;}
-  .sec{margin-top:22px;padding-top:16px;}
   /* 인쇄본에는 접힌 항목도 전문이 담겨야 한다 (JS 로도 펼치지만 폴백을 둔다) */
   .work.fold .wt::after,.fold-all{display:none!important;}
   .work.fold .tease{display:none!important;}
@@ -469,7 +468,6 @@ footer{
   /* 지면 밀도 조정 */
   h2{margin-bottom:16px;}
   .lead{margin-bottom:20px;line-height:1.6;}
-  .masthead{margin-bottom:4px;}
   .portrait{width:118px;}
   .cap{padding:10px 13px 11px;}
   .cap-d{line-height:1.62;margin-top:5px;}
@@ -519,8 +517,9 @@ a.pill{text-decoration:none;}
   .doc-kind{color:var(--muted);}
 
   /* 프로젝트 사이 구분선의 위아래 여백 — 화면의 42/38px 은 지면에서 너무 헐거워
-     이력서가 넉 장으로 늘어난다. 절반 이하로 좁혀 석 장에 담는다. */
-  .proj + .proj{margin-top:16px;padding-top:14px;}
+     이력서가 넉 장으로 늘어난다. 넷째 장 끝의 프로젝트가 밀려나지 않도록
+     넉넉히 좁혀, 브라우저마다 조판이 조금 달라도 석 장을 유지한다. */
+  .proj + .proj{margin-top:12px;padding-top:12px;}
   /* 여백이 좁아진 만큼 프로젝트가 장 경계에 걸리기 쉬워진다.
      기술 칩만 다음 장으로 떨어지지 않도록 블록을 통째로 유지한다. */
   .proj{break-inside:avoid;page-break-inside:avoid;}
@@ -532,6 +531,13 @@ a.pill{text-decoration:none;}
   #core,#projects{break-before:page;page-break-before:always;}
   /* 장 맨 위에 오는 섹션은 위쪽 여백을 지워 본문 시작선을 맞춘다 */
   #core,#projects{margin-top:0;}
+
+  /* 장 구성이 고정되면서 1·2장 아래에 여백이 남는다. 지면 밀도를 맞추는 대신
+     섹션 사이를 넓혀 그 자리를 쓴다 (화면 값 54/26 에 가깝게 되돌리는 셈).
+     3장은 프로젝트로 꽉 차므로 위쪽 여백만 원래대로 둔다. */
+  .sec{margin-top:38px;padding-top:26px;}
+  .masthead{margin-bottom:16px;}
+  #projects{padding-top:16px;}
 }
 </style>
 </head>
