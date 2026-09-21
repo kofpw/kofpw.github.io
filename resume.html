@@ -466,7 +466,7 @@ footer{
   .shot img{transform:none!important;}
   .stack .chip{background:#fff;}
 
-  /* 지면 밀도 조정 — 첫 장에 핵심 역량 6개가 모두 들어가도록 */
+  /* 지면 밀도 조정 */
   h2{margin-bottom:16px;}
   .lead{margin-bottom:20px;line-height:1.6;}
   .masthead{margin-bottom:4px;}
@@ -524,6 +524,14 @@ a.pill{text-decoration:none;}
   /* 여백이 좁아진 만큼 프로젝트가 장 경계에 걸리기 쉬워진다.
      기술 칩만 다음 장으로 떨어지지 않도록 블록을 통째로 유지한다. */
   .proj{break-inside:avoid;page-break-inside:avoid;}
+
+  /* 장 구성을 문서 순서에 맞춰 고정한다.
+       1장 — 인적사항 · 경력 · 학력 · 활동 · 인터뷰
+       2장 — 핵심 역량 · 보유 기술
+       3장 — 프로젝트 */
+  #core,#projects{break-before:page;page-break-before:always;}
+  /* 장 맨 위에 오는 섹션은 위쪽 여백을 지워 본문 시작선을 맞춘다 */
+  #core,#projects{margin-top:0;}
 }
 </style>
 </head>
@@ -541,6 +549,9 @@ a.pill{text-decoration:none;}
       <p class="toc-title">Contents</p>
       <ul>
         <li><a href="#career">경력</a></li>
+        <li><a href="#edu">학력</a></li>
+        <li><a href="#etc">활동 · 입상</a></li>
+        <li><a href="#interview">인터뷰</a></li>
         <li><a href="#core">핵심 역량</a></li>
         <li><a href="#skills">보유 기술</a></li>
         <li><a href="#projects">프로젝트</a></li>
@@ -548,9 +559,6 @@ a.pill{text-decoration:none;}
         <li class="sub"><a href="#p-bc">Battle Crush</a></li>
         <li class="sub"><a href="#p-lll">Project LLL</a></li>
         <li class="sub"><a href="#p-mxm">Master X Master</a></li>
-        <li><a href="#edu">학력</a></li>
-        <li><a href="#etc">활동 · 입상</a></li>
-        <li><a href="#interview">인터뷰</a></li>
       </ul>
     </nav>
   </div>
@@ -613,6 +621,37 @@ a.pill{text-decoration:none;}
       </div>
       <p class="sub">클라이언트 프로그래밍 · 엔진 프로그래밍</p>
     </div>
+  </section>
+
+  <!-- 학력 -->
+  <section class="sec" id="edu">
+    <h2>학력</h2>
+    <div class="item">
+      <div class="hrow">
+        <h3>홍익대학교 세종캠퍼스</h3>
+        <span class="period">2006.03 — 2012.02</span>
+      </div>
+      <p class="sub">게임학부 게임소프트웨어전공 · 졸업</p>
+    </div>
+  </section>
+
+  <!-- 활동 · 입상 -->
+  <section class="sec" id="etc">
+    <h2>활동 · 입상</h2>
+    <ul class="list">
+      <li><span class="t">UI코리아 게임 공모전 <strong>장려상</strong></span><span class="d">2007</span></li>
+      <li><span class="t">게임학부 게임제작 소모임 O2CUBE 부회장</span><span class="d">2010 — 2011</span></li>
+      <li><span class="t">전공 학술회 진행 (C++, DirectX)</span><span class="d">2007, 2010</span></li>
+    </ul>
+  </section>
+
+  <!-- 인터뷰 -->
+  <section class="sec" id="interview">
+    <h2>인터뷰</h2>
+    <a class="press" href="https://about.ncsoft.com/news/article/tech-track-6" target="_blank" rel="noopener">
+      <p class="src">NC · Tech Track</p>
+      <p class="ttl">배틀 크러쉬 이윤석 | 즐거움을 눈에 보이게 하는, 클라이언트 프로그래머<span class="arrow">↗</span></p>
+    </a>
   </section>
 
   <!-- 핵심 역량 -->
@@ -752,37 +791,6 @@ a.pill{text-decoration:none;}
       </div>
       <p class="more"><a href="career.html#p-mxm">경력기술서에서 상세 작업 내역 보기<span class="arrow">↗</span></a></p>
     </article>
-  </section>
-
-  <!-- 학력 -->
-  <section class="sec" id="edu">
-    <h2>학력</h2>
-    <div class="item">
-      <div class="hrow">
-        <h3>홍익대학교 세종캠퍼스</h3>
-        <span class="period">2006.03 — 2012.02</span>
-      </div>
-      <p class="sub">게임학부 게임소프트웨어전공 · 졸업</p>
-    </div>
-  </section>
-
-  <!-- 활동 · 입상 -->
-  <section class="sec" id="etc">
-    <h2>활동 · 입상</h2>
-    <ul class="list">
-      <li><span class="t">UI코리아 게임 공모전 <strong>장려상</strong></span><span class="d">2007</span></li>
-      <li><span class="t">게임학부 게임제작 소모임 O2CUBE 부회장</span><span class="d">2010 — 2011</span></li>
-      <li><span class="t">전공 학술회 진행 (C++, DirectX)</span><span class="d">2007, 2010</span></li>
-    </ul>
-  </section>
-
-  <!-- 인터뷰 -->
-  <section class="sec" id="interview">
-    <h2>인터뷰</h2>
-    <a class="press" href="https://about.ncsoft.com/news/article/tech-track-6" target="_blank" rel="noopener">
-      <p class="src">NC · Tech Track</p>
-      <p class="ttl">배틀 크러쉬 이윤석 | 즐거움을 눈에 보이게 하는, 클라이언트 프로그래머<span class="arrow">↗</span></p>
-    </a>
   </section>
 
   <footer>
